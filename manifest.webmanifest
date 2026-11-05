@@ -1,0 +1,16 @@
+{
+  "name": "Pepix",
+  "short_name": "Pepix",
+  "description": "Las películas de Gero y Ro: recomendaciones y pendientes para ver juntos.",
+  "lang": "es",
+  "start_url": "./?app=1",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0e0b0b",
+  "theme_color": "#0e0b0b",
+  "icons": [
+    {"src": "pepix-192.png", "sizes": "192x192", "type": "image/png"},
+    {"src": "pepix-512.png", "sizes": "512x512", "type": "image/png"},
+    {"src": "pepix-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}
+  ]
+}
