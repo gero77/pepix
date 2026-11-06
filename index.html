@@ -13,6 +13,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}img{max-width:100%}[hidden]{display:none!important}</style>
 
 
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@400;500;600&family=Barlow+Semi+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
@@ -167,6 +168,18 @@ main{padding-block:18px 64px}
   font-family:var(--cond);font-weight:700;font-size:12px;color:var(--c);display:grid;place-items:center;padding:0;transition:background .15s}
 .ck.on{background:var(--c);color:#111;border-color:var(--c)}
 .ck.j{--c:var(--red);border-radius:6px}
+.ck.other{opacity:.4}
+.ck.other:hover,.ck.other:focus-visible{opacity:1}
+.av{width:30px;height:30px;border-radius:50%;background:var(--c);color:#111;display:inline-grid;place-items:center;font-family:var(--cond);font-weight:700;font-size:14px;flex:none}
+.btn.me{padding:5px 11px 5px 6px}
+.btn.me .av{width:24px;height:24px;font-size:12px}
+.whos{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.whob{display:flex;flex-direction:column;align-items:center;gap:10px;padding:22px 10px;border-radius:12px;border:1.5px solid var(--line);background:var(--bg3);cursor:pointer;font-family:var(--display);font-size:32px;line-height:1;color:var(--fg)}
+.whob:hover,.whob.on{border-color:var(--c)}
+.whob .av{width:58px;height:58px;font-size:26px}
+.hi{margin:-4px 0 12px;font-family:var(--cond);font-size:16px;color:var(--dim)}
+.hi b{color:var(--fg)}
+.by{font-family:var(--cond);font-size:13px;color:var(--dim)}
 .ck.j svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:2}
 .ck.j.on{color:#fff}
 .ck.j.on svg{fill:currentColor}
@@ -288,6 +301,7 @@ input[type=date].inp{color-scheme:dark;padding:7px 10px}
     </a>
     <nav class="tabs" id="tabs"></nav>
     <div class="acts">
+      <button class="btn ghost me" id="meBtn" type="button" title="Quién usa este dispositivo"></button>
       <button class="btn ghost" id="syncBtn" type="button" title="Código compartido"><span class="dot" id="dot"></span><span class="lbl">Código</span></button>
       <button class="btn red" id="addBtn" type="button"><span aria-hidden="true">+</span><span class="lbl">Agregar</span></button>
     </div>
@@ -395,6 +409,8 @@ S.w=S.w||{};S.cfg=S.cfg||{};
 let code=ls.get(CKEY,"");
 let UI=Object.assign({filter:"all",sort:"list",pool:"juntos",pick:null},ls.get(PKEY,{}));
 const persist=()=>ls.set(KEY,S);
+let ME=ls.get("pepix_me","");if(!PEOPLE[ME])ME="";
+const OTHER=()=>ME==="gero"?"ro":"gero";
 const saveUI=()=>ls.set(PKEY,{filter:UI.filter,sort:UI.sort,pool:UI.pool});
 
 const M=id=>S.movies[id];
@@ -513,7 +529,7 @@ function posterInner(m,big){
 }
 function card(id){
   const m=M(id),p=prog(id),a=avg(id);
-  const cks=watchers(m.l).map(w=>`<button class="ck${seen(id,w)?" on":""}" style="--c:${PEOPLE[w].c}" data-ck="${w}" data-id="${id}" type="button" aria-pressed="${seen(id,w)}" title="${PEOPLE[w].n}: ${seen(id,w)?"vista":"marcar como vista"}">${PEOPLE[w].n[0]}</button>`).join("")
+  const cks=watchers(m.l).map(w=>`<button class="ck${seen(id,w)?" on":""}${ME&&w!==ME?" other":""}" style="--c:${PEOPLE[w].c}" data-ck="${w}" data-id="${id}" type="button" aria-pressed="${seen(id,w)}" title="${PEOPLE[w].n}: ${seen(id,w)?"vista":"marcar como vista"}">${PEOPLE[w].n[0]}</button>`).join("")
     +(m.l==="juntos"?`<button class="ck j${together(id)?" on":""}" data-ckj="${id}" type="button" aria-pressed="${together(id)}" title="La vimos juntos">${HEART}</button>`:"");
   return `<div class="card${p>=1?" done":""}">
     <button class="poster" data-open="${id}" type="button" aria-label="${esc(m.t)}">${posterInner(m)}
@@ -600,12 +616,17 @@ function viewHome(){
     const pend=ids(l).filter(i=>!done(i)).sort(byList);
     return `<section><div class="sec-h"><h3>${LISTS[l].n}</h3><a href="#${l}">Ver toda la lista ›</a></div>
       ${pend.length?`<div class="rowx">${pend.map(card).join("")}</div>`:`<p class="empty">Todo visto en esta lista.</p>`}</section>`}).join("");
+  let myRow="",hi="";
+  if(ME){const mine=Object.keys(S.movies).filter(i=>{const x=M(i);return (x.l==="juntos"||LISTS[x.l].to===ME)&&!seen(i,ME)&&!upcoming(x)}).sort(byList);
+    myRow=`<section><div class="sec-h"><h3>Mis pendientes</h3><span>${mine.length} película${mine.length===1?"":"s"}</span></div>${mine.length?`<div class="rowx">${mine.map(card).join("")}</div>`:`<p class="empty">No te queda nada pendiente. Bien ahí.</p>`}</section>`;
+    const mk=Object.keys(LISTS).find(l=>LISTS[l].to===ME),left=ids(mk).filter(i=>!done(i)).length,jl=ids("juntos").filter(i=>!seen(i,ME)).length;
+    hi=`<p class="hi">Te faltan <b>${left}</b> de las que te pasó ${PEOPLE[OTHER()].n} y <b>${jl}</b> de las de juntos.</p>`}
   const recent=Object.keys(S.movies).map(id=>{const ds=["gero","ro"].map(w=>(W(id,w)||{}).s&&(W(id,w)||{}).d).filter(Boolean).sort();return [id,ds.pop()||""]})
     .filter(x=>x[1]).sort((a,b)=>b[1].localeCompare(a[1])).slice(0,14);
   const rec=recent.length?`<section><div class="sec-h"><h3>Vistas hace poco</h3></div><div class="rowx">${recent.map(x=>card(x[0])).join("")}</div></section>`:"";
   return `<div class="view">${bill}
-    <section><div class="sec-h"><h3>El marcador</h3></div><div class="score">${LORDER.map(meter).join("")}</div>${mini}</section>
-    ${rows}${rec}
+    <section><div class="sec-h"><h3>${ME?"Hola, "+PEOPLE[ME].n:"El marcador"}</h3></div>${hi}<div class="score">${LORDER.map(meter).join("")}</div>${mini}</section>
+    ${myRow}${rows}${rec}
     <p class="credit">Pósters y datos de películas: TMDB. Plataformas: JustWatch. Esta app usa la API de TMDB pero no está avalada ni certificada por TMDB.</p></div>`;
 }
 function listIds(l){
@@ -636,6 +657,7 @@ function render(fromRemote){
   const r=route();
   if(r!==lastRoute){UI.q="";lastRoute=r}
   renderTabs();
+  const mb=$("#meBtn");if(mb)mb.innerHTML=ME?`<span class="av" style="--c:${PEOPLE[ME].c}">${PEOPLE[ME].n[0]}</span><span class="lbl">${PEOPLE[ME].n}</span>`:`<span class="lbl" style="display:inline">¿Quién sos?</span>`;
   const qf=document.activeElement&&document.activeElement.id==="q",pos=qf?document.activeElement.selectionStart:0;
   $("#main").innerHTML=r==="inicio"?viewHome():viewList(r);
   if(qf){const q=$("#q");if(q){q.focus();q.setSelectionRange(pos,pos)}}
@@ -663,6 +685,7 @@ function setTogether(id,on){
   push(upd);render();
 }
 function addMovie(m){
+  if(ME)m.by=ME;
   const id=rid();m.a=Date.now();S.movies[id]=m;push({["movies."+id]:m});render();return id;
 }
 function updMovie(id,patch){
@@ -687,7 +710,7 @@ function closeSheet(){if(sheetEl){sheetEl.remove();sheetEl=null;sheetId=null;doc
 function whoBlock(id,who){
   const v=W(id,who)||{},c=PEOPLE[who].c,n=PEOPLE[who].n;
   return `<div class="wb${v.s?" on":""}" style="--c:${c}">
-    <div class="wb-h"><span class="nm">${n}</span><button class="sw${v.s?" on":""}" type="button" data-seen="${who}" aria-pressed="${!!v.s}">${v.s?"✓ Vista":"Marcar vista"}</button></div>
+    <div class="wb-h"><span class="nm">${n}${who===ME?"<em>vos</em>":""}</span><button class="sw${v.s?" on":""}" type="button" data-seen="${who}" aria-pressed="${!!v.s}">${v.s?"✓ Vista":"Marcar vista"}</button></div>
     ${v.s?`<div class="wb-b">
       <div class="fld"><label class="lab" for="d-${who}">Fecha</label><input class="inp" type="date" id="d-${who}" data-date="${who}" value="${esc(v.d||"")}"></div>
       <div class="fld"><span class="lab">Puntaje</span>${stars(id,who,v.r,"Puntaje de "+n)}</div>
@@ -702,7 +725,7 @@ function renderSheet(fromRemote){
   if(fromRemote&&sheetEl.contains(document.activeElement)&&/INPUT|TEXTAREA/.test(document.activeElement.tagName))return;
   const L=LISTS[m.l],list=navList(),k=list.indexOf(id);
   let people;
-  if(m.l==="juntos")people=`<button class="tog${together(id)?" on":""}" type="button" data-together aria-pressed="${together(id)}">${HEART}${together(id)?"La vimos juntos":"Marcar que la vimos juntos"}</button>${whoBlock(id,"gero")}${whoBlock(id,"ro")}`;
+  if(m.l==="juntos")people=`<button class="tog${together(id)?" on":""}" type="button" data-together aria-pressed="${together(id)}">${HEART}${together(id)?"La vimos juntos":"Marcar que la vimos juntos"}</button>${whoBlock(id,ME||"gero")}${whoBlock(id,ME?OTHER():"ro")}`;
   else{const fr=W(id,L.from)||{};
     people=whoBlock(id,L.to)+`<div class="wb" style="--c:${PEOPLE[L.from].c}"><div class="wb-h"><span class="nm">${PEOPLE[L.from].n}<em>la recomendó · su puntaje</em></span>${stars(id,L.from,fr.r,"Puntaje de "+PEOPLE[L.from].n)}</div></div>`}
   const edit=editing?`<div class="edit">
@@ -715,7 +738,7 @@ function renderSheet(fromRemote){
     <div class="sh-top"><div class="art">${posterInner(m)}</div>
       <div class="sh-meta"><h2>${esc(m.t)}</h2>${m.ot&&m.ot!==m.t?`<div class="ot">${esc(m.ot)}</div>`:""}
         <div class="facts">${m.y?`<span>${m.y}</span>`:""}${m.m?`<span>${dur(m.m)}</span>`:""}${m.g?`<span>${esc(m.g)}</span>`:""}</div>
-        <span class="chipl">${L.n}</span>
+        <span class="chipl">${L.n}</span>${m.by&&PEOPLE[m.by]?`<span class="by">La sumó ${PEOPLE[m.by].n}${m.a?" el "+new Date(m.a).toLocaleDateString("es-AR"):""}</span>`:""}
         ${m.r?`<p class="ovw">${esc(m.r)}</p>`:`<p class="muted">${m.nx?"No la encontré en TMDB. Corregí el título o el año en Editar.":tkey()?"Buscando datos…":"Sin sinopsis todavía. Aparece cuando cargues la clave de TMDB (en Código)."}</p>`}
       ${whereBlock(m)}</div></div>
     <div class="pad">${people}${edit}</div>
@@ -815,6 +838,7 @@ function openPanel(){
   const d=getDb(),k=tkey();
   panEl.innerHTML=`<div class="box sm"><button class="x" type="button" data-a="close" aria-label="Cerrar">✕</button><div class="pad">
     <h2>Código compartido</h2>
+    <p class="muted">Este dispositivo es de <b style="color:${ME?PEOPLE[ME].c:"var(--fg)"}">${ME?PEOPLE[ME].n:"nadie todavía"}</b>. <button class="btn ghost" type="button" data-a="who" style="padding:4px 10px;margin-left:4px">Cambiar</button></p>
     ${!d?`<p class="msg err">No se pudo cargar la sincronización. Revisá la conexión y volvé a abrir esta ventana.</p>`:""}
     ${code?`<p class="muted">Este dispositivo está sincronizado. En el otro, tocá «Código» → «Unirme» y escribí:</p>
       <div class="code">${code}</div>
@@ -837,6 +861,7 @@ function openPanel(){
     if(e.target===panEl)return closePanel();
     const b=e.target.closest("button");if(!b)return;const a=b.dataset.a;
     if(a==="close")return closePanel();
+    if(a==="who"){closePanel();return openWho()}
     if(a==="copy"){try{await navigator.clipboard.writeText(code);msg("Código copiado.","ok")}catch(err){msg("Seleccioná el código y copialo a mano.")}return}
     if(a==="leave"){if(unsub)unsub();unsub=null;code="";ls.set(CKEY,"");badge("off");openPanel();return}
     if(a==="create"){b.disabled=true;msg("Creando…");const c=newCode();
@@ -858,12 +883,33 @@ function openPanel(){
 }
 function closePanel(){if(panEl){panEl.remove();panEl=null;if(!sheetEl)document.body.style.overflow=""}}
 
+/* ================= quién sos ================= */
+let whoEl=null;
+function openWho(){
+  closeWho();
+  whoEl=document.createElement("div");whoEl.className="ov";whoEl.setAttribute("role","dialog");whoEl.setAttribute("aria-modal","true");
+  whoEl.innerHTML=`<div class="box sm">${ME?`<button class="x" type="button" data-a="close" aria-label="Cerrar">✕</button>`:""}<div class="pad">
+    <h2>¿Quién sos?</h2>
+    <p class="muted">Elegí quién usa este dispositivo. Queda guardado acá y lo podés cambiar cuando quieras tocando tu nombre arriba.</p>
+    <div class="whos">${["gero","ro"].map(w=>`<button type="button" class="whob${ME===w?" on":""}" data-me="${w}" style="--c:${PEOPLE[w].c}"><span class="av">${PEOPLE[w].n[0]}</span>${PEOPLE[w].n}</button>`).join("")}</div>
+  </div></div>`;
+  document.body.appendChild(whoEl);document.body.style.overflow="hidden";
+  whoEl.addEventListener("click",e=>{
+    if(e.target===whoEl){if(ME)closeWho();return}
+    const b=e.target.closest("button");if(!b)return;
+    if(b.dataset.a==="close")return closeWho();
+    if(b.dataset.me){ME=b.dataset.me;ls.set("pepix_me",ME);closeWho();render();toast(`Listo, este dispositivo es de ${PEOPLE[ME].n}.`)}
+  });
+  whoEl.querySelector(".whob").focus();
+}
+function closeWho(){if(whoEl){whoEl.remove();whoEl=null;if(!sheetEl&&!panEl&&!addEl)document.body.style.overflow=""}}
+
 /* ================= eventos globales ================= */
 let toastT=0;
 function toast(t,ms){let el=$(".toast");if(!el){el=document.createElement("div");el.className="toast";el.setAttribute("role","status");document.body.appendChild(el)}
   el.textContent=t;clearTimeout(toastT);toastT=setTimeout(()=>el.remove(),ms||2600)}
 document.addEventListener("click",e=>{
-  if(sheetEl&&sheetEl.contains(e.target)||addEl&&addEl.contains(e.target)||panEl&&panEl.contains(e.target))return;
+  if(whoEl&&whoEl.contains(e.target)||sheetEl&&sheetEl.contains(e.target)||addEl&&addEl.contains(e.target)||panEl&&panEl.contains(e.target))return;
   const b=e.target.closest("button");if(!b)return;
   if(b.dataset.ck)return toggleSeen(b.dataset.id,b.dataset.ck);
   if(b.dataset.ckj)return setTogether(b.dataset.ckj,!together(b.dataset.ckj));
@@ -874,11 +920,12 @@ document.addEventListener("click",e=>{
   if(b.dataset.addto)return openAdd(b.dataset.addto);
   if(b.id==="addBtn"){const r=route();return openAdd(r==="inicio"?"juntos":r)}
   if(b.id==="syncBtn")return openPanel();
+  if(b.id==="meBtn")return openWho();
 });
 document.addEventListener("input",e=>{if(e.target.id==="q"){UI.q=e.target.value;render()}});
 document.addEventListener("change",e=>{if(e.target.id==="sort"){UI.sort=e.target.value;saveUI();render()}});
 document.addEventListener("keydown",e=>{
-  if(e.key==="Escape"){if(addEl)return closeAdd();if(panEl)return closePanel();if(sheetEl)return closeSheet()}
+  if(e.key==="Escape"){if(whoEl){if(ME)closeWho();return}if(addEl)return closeAdd();if(panEl)return closePanel();if(sheetEl)return closeSheet()}
   if(sheetEl&&!addEl&&!/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)){
     if(e.key==="ArrowRight")sheetEl.querySelector('[data-a="next"]:not([disabled])')?.click();
     if(e.key==="ArrowLeft")sheetEl.querySelector('[data-a="prev"]:not([disabled])')?.click();
@@ -891,6 +938,7 @@ render();
 badge("off");
 if(code)listen(code);
 if(tkey())enrichSoon();
+if(!ME)openWho();
 </script>
 
 <script>if("serviceWorker" in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));</script>
