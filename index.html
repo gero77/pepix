@@ -98,7 +98,7 @@ main{padding-block:18px 64px}
 .bill h2{font-family:var(--display);font-weight:400;font-size:clamp(40px,7vw,72px);line-height:.9;margin:0;letter-spacing:.5px;text-wrap:balance}
 .facts{font-family:var(--cond);font-size:14px;color:var(--dim);display:flex;flex-wrap:wrap;gap:4px 12px}
 .facts .tagl{color:var(--fg)}
-.bill p.ov{margin:0;max-width:58ch;color:color-mix(in srgb,var(--fg) 86%,transparent);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.bill p.syn{margin:0;max-width:58ch;color:color-mix(in srgb,var(--fg) 86%,transparent);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
 .bill .row{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
 .pool{display:flex;gap:6px;flex-wrap:wrap}
 .pool button{font-family:var(--cond);font-size:12.5px;font-weight:600;padding:4px 10px;border-radius:99px;
@@ -582,7 +582,7 @@ function viewHome(){
         <span class="eyebrow"><b>P</b>¿Qué vemos hoy?</span>
         <h2>${esc(m.t)}</h2>
         <div class="facts">${m.y?`<span>${m.y}</span>`:""}${m.m?`<span>${dur(m.m)}</span>`:""}${m.g?`<span>${esc(m.g)}</span>`:""}<span class="tagl">${LISTS[m.l].n}</span>${m.pv&&m.pv.length?`<span class="tagl">En ${esc(m.pv.slice(0,3).join(", "))}</span>`:""}</div>
-        ${m.r?`<p class="ov">${esc(m.r)}</p>`:""}
+        ${m.r?`<p class="syn">${esc(m.r)}</p>`:""}
         <div class="row"><button class="btn red" type="button" data-open="${id}">Ver ficha</button><button class="btn" type="button" data-reroll>Sortear otra</button></div>
         <div class="pool" role="group" aria-label="Sortear de">${poolBtns}</div>
       </div>

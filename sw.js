@@ -1,5 +1,5 @@
 // Subir VERSION en cada publicación.
-const VERSION = "pepix-2";
+const VERSION = "pepix-3";
 const SHELL = ["./", "./index.html"];
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(VERSION).then(c => c.addAll(SHELL)).then(() => self.skipWaiting()));
