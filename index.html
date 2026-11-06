@@ -12,6 +12,7 @@
 <link rel="apple-touch-icon" href="pepix-512.png">
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}img{max-width:100%}[hidden]{display:none!important}</style>
 
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@400;500;600&family=Barlow+Semi+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
@@ -437,7 +438,8 @@ function badge(s){syncState=s;const d=$("#dot");d.className="dot"+(code?(s==="on
 const newCode=()=>{let s="";for(let i=0;i<8;i++)s+=ALPHA[Math.floor(Math.random()*ALPHA.length)];return s};
 
 /* ================= TMDB ================= */
-const tkey=()=>ls.get(TKEY,"")||S.cfg.k||"";
+const TMDB_DEFAULT="09aba39efe3695b214765856c353d833";
+const tkey=()=>ls.get(TKEY,"")||S.cfg.k||TMDB_DEFAULT;
 async function tmdb(path,params={}){
   const k=tkey();if(!k)throw new Error("sin clave");
   const u=new URL("https://api.themoviedb.org/3"+path);
