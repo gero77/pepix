@@ -1,5 +1,5 @@
 // Subir VERSION en cada publicación.
-const VERSION = "pepix-3";
+const VERSION = "pepix-4";
 const SHELL = ["./", "./index.html"];
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(VERSION).then(c => c.addAll(SHELL)).then(() => self.skipWaiting()));
@@ -14,7 +14,8 @@ self.addEventListener("fetch", e => {
   if (e.request.method !== "GET" || u.origin !== location.origin) return;
   const isPage = e.request.mode === "navigate" || u.pathname.endsWith("/") || u.pathname.endsWith("index.html");
   e.respondWith(
-    fetch(e.request).then(r => {
+    // no-cache: revalida contra GitHub Pages en vez de usar la copia del navegador (dura 10 min).
+    fetch(isPage ? u.origin + u.pathname : e.request, { cache: "no-cache" }).then(r => {
       if (isPage && r.ok) { const c = r.clone(); caches.open(VERSION).then(x => x.put("./index.html", c)); }
       return r;
     }).catch(() => caches.match(isPage ? "./index.html" : e.request))
